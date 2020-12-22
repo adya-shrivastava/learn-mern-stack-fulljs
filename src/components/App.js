@@ -3,15 +3,18 @@ import React from 'react';
 import Header from './Header';
 import ContestList from './ContestList';
 import Contest from './Contest';
+import * as api from '../api';
+import PropTypes from 'prop-types';
 
 const pushState = (object, url) =>
     window.history.pushState(object, '', url);
 
 class App extends React.Component {
-    state = {
-        pageHeader: 'Naming Contests',
-        contests: this.props.initialContests
+    static propTypes = {
+        initialData: PropTypes.object.isRequired
     };
+
+    state = this.props.initialData;
     componentDidMount() {
     }
 
@@ -24,16 +27,33 @@ class App extends React.Component {
             `/contest/${contestId}`
         );
 
-        // look up the contest
-        this.setState({
-            pageHeader: this.state.contests[contestId].contestName,
-            currentContestId: contestId
+        api.fetchContest(contestId).then(contest => {
+            // look up the contest
+            this.setState({
+                currentContestId: contest.id,
+                contests : {
+                    ...this.state.contests,
+                    [contest.id]: contest
+                }
+            });
         });
     };
 
+    currentContest () {
+        return this.state.contests[this.state.currentContestId];
+    }
+
+    pageHeader() {
+        if (this.state.currentContestId) {
+            return this.currentContest().contestName;
+        }
+
+        return 'Naming Contests';
+    }
+
     currentContent() {
         if (this.state.currentContestId) {
-            return <Contest {...this.state.contests[this.state.currentContestId]} />;
+            return <Contest {...this.currentContest()} />;
         }
 
         return <ContestList
@@ -44,7 +64,7 @@ class App extends React.Component {
     render() {
         return (
             <div className='App'>
-                <Header message={this.state.pageHeader} />
+                <Header message={this.pageHeader()} />
                 {this.currentContent()}
 
             </div>
