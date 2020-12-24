@@ -9,6 +9,10 @@ import PropTypes from 'prop-types';
 const pushState = (object, url) =>
     window.history.pushState(object, '', url);
 
+const onPopState = handler => {
+    window.onpopstate = handler;
+};
+
 class App extends React.Component {
     static propTypes = {
         initialData: PropTypes.object.isRequired
@@ -16,9 +20,15 @@ class App extends React.Component {
 
     state = this.props.initialData;
     componentDidMount() {
+        onPopState((event) => {
+            this.setState({
+                currentContestId: (event.state || {}).currentContestId
+            });
+        });
     }
 
     componentWillUnmount() {
+        onPopState(null);
     }
 
     fetchContest = (contestId) => {
@@ -42,7 +52,7 @@ class App extends React.Component {
     fetchContestList = () => {
         pushState(
             { currentContestId: null },
-            `/`
+            '/'
         );
 
         api.fetchContestList().then(contests => {
