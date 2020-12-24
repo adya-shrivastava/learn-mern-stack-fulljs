@@ -1,25 +1,60 @@
 import express from 'express';
-import data from '../src/testData.json';
+import { MongoClient } from 'mongodb';
+import assert from 'assert';
+import config from '../config';
+
+let mdb;
+MongoClient.connect(config.mongodbUri, (err, client) => {
+    assert.strictEqual(null, err);
+
+    mdb = client.db('test');
+});
 
 const router = express.Router();
-const contests = data.contests.reduce((object, contest) => {
-    object[contest.id] = contest;
-    return object;
-}, {});
 
 router.get('/contests', (req, res) => {
-    res.send({ 
-        contests : contests
-    });
+    let contests = {};
+    mdb.collection('contests')
+        .find({})
+        .project({
+            id: 1,
+            categoryName: 1,
+            contestName: 1
+        })
+        .each((err, contest) => {
+            assert.strictEqual(null, err);
+
+            if (!contest) {
+                res.send({ contests });
+                return;
+            }
+            contests[contest.id] = contest;
+        });
+});
+
+router.get('/names/:nameIds', (req, res) => {
+    const nameIds = req.params.nameIds.split(',').map(Number);
+    let names = {};
+    mdb.collection('names')
+        .find({id: {$in: nameIds}})
+        .each((err, name) => {
+            assert.strictEqual(null, err);
+
+            if (!name) {
+                res.send({ names });
+                return;
+            }
+            names[name.id] = name;
+        });
 });
 
 
 router.get('/contests/:contestId', (req, res) => {
-    let contest = contests[req.params.contestId];
+    mdb.collection('contests')
+        .findOne({ id: Number(req.params.contestId) })
+        .then(contest => res.send(contest))
+        .catch(console.error);
 
-    contest.description = 'This is a fake description ....';
-
-    res.send(contest);
 });
 
 export default router;

@@ -7,7 +7,7 @@ import App from './src/components/App';
 
 const getApiUrl = contestId => {
     if (contestId) {
-        return `${config.serverUrl}/api/contests/${contestId}`
+        return `${config.serverUrl}/api/contests/${contestId}`;
     }
     return `${config.serverUrl}/api/contests`;
 };
