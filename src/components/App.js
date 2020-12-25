@@ -64,6 +64,17 @@ class App extends React.Component {
         });
     };
 
+    fetchNames = (nameIds) => {
+        if (nameIds.length === 0) {
+            return;
+        }
+        api.fetchNames(nameIds).then(names => {
+            this.setState({
+                names
+            });
+        });
+    }
+
     currentContest() {
         return this.state.contests[this.state.currentContestId];
     }
@@ -76,10 +87,21 @@ class App extends React.Component {
         return 'Naming Contests';
     }
 
+    lookupName = (nameId) => {
+        if (!this.state.names || !this.state.names[nameId]) {
+            return {
+                name: '...'
+            };
+        }
+        return this.state.names[nameId];
+    }
+
     currentContent() {
         if (this.state.currentContestId) {
             return <Contest {...this.currentContest()}
-                contestLinkClick={this.fetchContestList} />;
+                contestLinkClick={this.fetchContestList} 
+                fetchNames={this.fetchNames}
+                lookupName={this.lookupName}/>;
         }
 
         return <ContestList
