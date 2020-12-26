@@ -4,8 +4,11 @@ import path from 'path';
 import express from 'express';
 import sassMiddleware from 'node-sass-middleware';
 import serverRender from './serverRender';
+import bodyParser from 'body-parser';
 
 const server = express();
+server.use(bodyParser.json());
+
 server.use(sassMiddleware({
     src: path.join(__dirname, 'sass'),
     dest: path.join(__dirname, 'public')
