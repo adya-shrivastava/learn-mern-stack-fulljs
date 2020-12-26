@@ -2,9 +2,25 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 class Contest extends Component {
+
+    constructor(props) {
+        super(props);
+        this.newNameInput = null;
+
+        this.setTextInputRef = element => {
+            this.newNameInput = element;
+        };
+    }
     componentDidMount() {
         this.props.fetchNames(this.props.nameIds);
     }
+
+    handleSubmit = (event) => {
+        event.preventDefault();
+        this.props.addName(this.newNameInput.value, this.props._id);
+        this.newNameInput.value = '';
+    }
+
     render() {
 
         return (
@@ -41,11 +57,14 @@ class Contest extends Component {
                         <h3 className="panel-title">Propose a New Name</h3>
                     </div>
                     <div className="panel-body">
-                        <form>
+                        <form onSubmit={this.handleSubmit}>
                             <div className="input-group">
-                                <input type="text" placeholder="New Name Here..." className="form-control" />
+                                <input type="text" 
+                                    placeholder="New Name Here..."
+                                    ref={this.setTextInputRef} 
+                                    className="form-control" />
                                 <span className="input-group-btn">
-                                    <button type="submit" className="btn btn-info">Sumbit</button>
+                                    <button type="submit" className="btn btn-info">Submit</button>
                                 </span>
                             </div>
                         </form>
@@ -60,11 +79,13 @@ class Contest extends Component {
 }
 
 Contest.propTypes = {
+    _id: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
     contestLinkClick: PropTypes.func.isRequired,
     fetchNames: PropTypes.func.isRequired,
     nameIds: PropTypes.array.isRequired,
-    lookupName: PropTypes.func.isRequired
+    lookupName: PropTypes.func.isRequired,
+    addName: PropTypes.func.isRequired
 };
 
 export default Contest;
